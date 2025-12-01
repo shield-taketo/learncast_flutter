@@ -1,0 +1,17 @@
+analyzer:
+  exclude:
+    - "pubspec.yaml"
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "**/oss_licenses_page.dart"
+    - "**/oss_licenses.dart"
+  errors:
+    invalid_annotation_target: ignore
+    lines_longer_than_80_chars: ignore
+
+include: package:pedantic_mono/analysis_options.yaml
+
+linter:
+  rules:
+    - depend_on_referenced_packages
+    - prefer_relative_imports
