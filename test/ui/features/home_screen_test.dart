@@ -107,7 +107,7 @@ void main() {
     });
   });
 
-  testWidgets('displays video list on successful load', (tester) async {
+  testWidgets('displays error message when load fails', (tester) async {
     await mockNetworkImagesFor(() async {
       await tester.pumpWidget(
         wrap(const HomeScreen(), _ErrorVideoRepository()),
