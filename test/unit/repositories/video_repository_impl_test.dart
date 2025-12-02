@@ -1,45 +1,68 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learncast_flutter/data/datasources/remote/video_remote_data_source.dart';
+import 'package:learncast_flutter/data/models/video_dto.dart';
 import 'package:learncast_flutter/data/repositories/video_repository_impl.dart';
+import 'package:learncast_flutter/domain/exceptions/app_exception.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockDio extends Mock implements Dio {}
+class MockVideoRemoteDataSource extends Mock implements VideoRemoteDataSource {}
 
 void main() {
-  late MockDio dio;
-  late VideoRemoteDataSource ds;
-  late VideoRepositoryImpl repo;
+  late MockVideoRemoteDataSource dataSource;
+  late VideoRepositoryImpl repository;
+
+  const dto = VideoDto(
+    id: 'v1',
+    title: 'Sample',
+    thumbnailUrl: 'https://example.com/thumb.jpg',
+    videoUrl: 'https://example.com/video.mp4',
+    viewCount: 100,
+    likeCount: 10,
+    commentCount: 3,
+    durationSeconds: 120,
+    isLiked: true,
+  );
 
   setUp(() {
-    dio = MockDio();
-    ds = VideoRemoteDataSourceImpl(dio);
-    repo = VideoRepositoryImpl(ds);
+    dataSource = MockVideoRemoteDataSource();
+    repository = VideoRepositoryImpl(dataSource);
   });
 
-  test('fetchVideos returns list of videos', () async {
-    when(() => dio.get<List<dynamic>>(any())).thenAnswer(
-      (_) async => Response(
-        data: [
-          {
-            'id': 'v1',
-            'title': 'Sample',
-            'thumbnail_url': 'https://example.com/thumb.jpg',
-            'video_url': 'https://example.com/video.mp4',
-            'view_count': 100,
-            'like_count': 10,
-            'comment_count': 3,
-            'duration_seconds': 120,
-            'is_liked': true,
-          },
-        ],
-        statusCode: 200,
-        requestOptions: RequestOptions(),
-      ),
-    );
+  test('converts DTO list to entity list when fetchVideos succeeds', () async {
+    when(() => dataSource.fetchVideos()).thenAnswer((_) async => const [dto]);
 
-    final result = await repo.fetchVideos();
+    final result = await repository.fetchVideos();
+
     expect(result.length, 1);
     expect(result.first.id, 'v1');
+    expect(result.first.duration, const Duration(seconds: 120));
+    expect(result.first.isLiked, true);
+  });
+
+  test('throws AppException when fetchVideos fails', () {
+    when(() => dataSource.fetchVideos()).thenThrow(Exception('network'));
+
+    expect(
+      repository.fetchVideos,
+      throwsA(isA<AppException>()),
+    );
+  });
+
+  test('converts DTO to entity when toggleLike succeeds', () async {
+    when(() => dataSource.toggleLike(videoId: 'v1')).thenAnswer((_) async => dto);
+
+    final result = await repository.toggleLike(videoId: 'v1');
+
+    expect(result.id, 'v1');
+    expect(result.isLiked, true);
+  });
+
+  test('throws AppException when toggleLike fails', () {
+    when(() => dataSource.toggleLike(videoId: 'v1')).thenThrow(Exception('network'));
+
+    expect(
+      () => repository.toggleLike(videoId: 'v1'),
+      throwsA(isA<AppException>()),
+    );
   });
 }

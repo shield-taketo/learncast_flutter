@@ -7,19 +7,19 @@ import 'package:mocktail/mocktail.dart';
 
 class MockRepo extends Mock implements VideoRepository {}
 
-void main() {
-  const sample = Video(
-    id: '1',
-    title: 'A',
-    thumbnailUrl: '',
-    videoUrl: '',
-    viewCount: 0,
-    likeCount: 10,
-    commentCount: 0,
-    duration: Duration(seconds: 10),
-    isLiked: false,
-  );
+const _sample = Video(
+  id: '1',
+  title: 'A',
+  thumbnailUrl: '',
+  videoUrl: '',
+  viewCount: 0,
+  likeCount: 10,
+  commentCount: 0,
+  duration: Duration(seconds: 60),
+  isLiked: false,
+);
 
+void main() {
   late MockRepo repo;
   late HomeController controller;
 
@@ -28,23 +28,51 @@ void main() {
     controller = HomeController(repo);
   });
 
-  test('load success updates state', () async {
-    when(() => repo.fetchVideos()).thenAnswer((_) async => [sample]);
+  test('has default initial state', () {
+    expect(controller.state, const HomeState());
+  });
+
+  test('updates state correctly when load succeeds', () async {
+    when(() => repo.fetchVideos()).thenAnswer((_) async => const [_sample]);
 
     await controller.load();
 
     expect(controller.state.isLoading, false);
-    expect(controller.state.videos.length, 1);
+    expect(controller.state.errorMessage, isNull);
+    expect(controller.state.videos, const [_sample]);
   });
 
-  test('toggleLike optimistic update', () async {
-    controller = HomeController(repo)..state = const HomeState(videos: [sample]);
+  test('sets error message when load fails', () async {
+    when(() => repo.fetchVideos()).thenThrow(Exception('network'));
 
-    when(() => repo.toggleLike(videoId: '1')).thenAnswer((_) async => sample.copyWith(isLiked: true, likeCount: 11));
+    await controller.load();
 
-    await controller.toggleLike(sample);
+    expect(controller.state.isLoading, false);
+    expect(controller.state.videos, isEmpty);
+    expect(controller.state.errorMessage, '動画一覧の取得に失敗しました');
+  });
 
-    expect(controller.state.videos.first.isLiked, true);
-    expect(controller.state.videos.first.likeCount, 11);
+  test('updates liked video when toggleLike succeeds', () async {
+    controller = HomeController(repo)..state = const HomeState(videos: [_sample]);
+
+    final updated = _sample.copyWith(isLiked: true, likeCount: 11);
+
+    when(() => repo.toggleLike(videoId: _sample.id)).thenAnswer((_) async => updated);
+
+    await controller.toggleLike(_sample);
+
+    expect(controller.state.videos.single, updated);
+  });
+
+  test('rolls back optimistic update when toggleLike fails', () async {
+    controller = HomeController(repo)..state = const HomeState(videos: [_sample]);
+
+    when(() => repo.toggleLike(videoId: _sample.id)).thenThrow(Exception('api error'));
+
+    final before = controller.state.videos.single;
+
+    await controller.toggleLike(_sample);
+
+    expect(controller.state.videos.single, before);
   });
 }
