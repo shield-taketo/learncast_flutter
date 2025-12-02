@@ -43,7 +43,7 @@ void main() {
     when(() => dataSource.fetchVideos()).thenThrow(Exception('network'));
 
     expect(
-      repository.fetchVideos,
+      () => repository.fetchVideos(),
       throwsA(isA<AppException>()),
     );
   });
