@@ -39,8 +39,15 @@ class HomeScreen extends ConsumerWidget {
             }
 
             if (!state.isLoading && state.errorMessage == null && state.videos.isEmpty) {
-              return const Center(
-                child: Text('動画がありません'),
+              return ListView(
+                children: [
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.3,
+                  ),
+                  const Center(
+                    child: Text('動画がありません'),
+                  ),
+                ],
               );
             }
 
