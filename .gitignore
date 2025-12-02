@@ -49,3 +49,6 @@ app.*.map.json
 
 # env
 /assets/.env
+
+# Test coverage artifacts (auto-generated)
+coverage/
