@@ -26,6 +26,7 @@ class HomeScreen extends ConsumerWidget {
             if (state.isLoading && state.videos.isEmpty) {
               return const Center(child: CircularProgressIndicator());
             }
+
             if (state.errorMessage != null && state.videos.isEmpty) {
               return ListView(
                 children: [
@@ -36,6 +37,13 @@ class HomeScreen extends ConsumerWidget {
                 ],
               );
             }
+
+            if (!state.isLoading && state.errorMessage == null && state.videos.isEmpty) {
+              return const Center(
+                child: Text('動画がありません'),
+              );
+            }
+
             return ListView.builder(
               itemCount: state.videos.length,
               itemBuilder: (context, index) {
