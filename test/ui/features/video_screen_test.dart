@@ -44,19 +44,19 @@ class _FakeVideoPlayerPlatform extends Fake with MockPlatformInterfaceMixin impl
   Future<void> setPlaybackSpeed(int textureId, double speed) async {}
 }
 
-void main() {
-  const sample = Video(
-    id: 'v1',
-    title: 'Sample Video',
-    thumbnailUrl: 'https://example.com/thumb.jpg',
-    videoUrl: 'https://example.com/video.mp4',
-    viewCount: 123,
-    likeCount: 10,
-    commentCount: 3,
-    duration: Duration(minutes: 3, seconds: 21),
-    isLiked: false,
-  );
+const _sample = Video(
+  id: 'v1',
+  title: 'Sample Video',
+  thumbnailUrl: 'https://example.com/thumb.jpg',
+  videoUrl: 'https://example.com/video.mp4',
+  viewCount: 123,
+  likeCount: 10,
+  commentCount: 3,
+  duration: Duration(minutes: 3, seconds: 21),
+  isLiked: false,
+);
 
+void main() {
   setUpAll(() {
     VideoPlayerPlatform.instance = _FakeVideoPlayerPlatform();
   });
@@ -66,7 +66,7 @@ void main() {
       const ProviderScope(
         child: MaterialApp(
           home: VideoScreen(
-            video: sample,
+            video: _sample,
           ),
         ),
       ),
