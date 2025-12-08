@@ -27,7 +27,14 @@ Web / iOS / Android の 3プラットフォームに対応しています。
 
 [fvmのインストール方法はこちら](https://fvm.app/documentation/getting-started)
 
-`asstes/`下に`.env`を用意する必要があります。
+## envファイル
+
+`asstes/.env`を用意する必要があります。
+
+```txt:.env
+API_BASE_URL=https://jsonplaceholder.typicode.com
+WEB_BASE_URL=
+```
 
 ## コマンド一覧
 
